@@ -1,0 +1,53 @@
+version: "1.0"                       # 配置版本号，供路由决策留痕对齐
+
+models:
+  chat-fast:                         # 平台逻辑模型名（业务语义命名）
+    adapter: openai_compatible
+    capabilities: [streaming, structured_output]
+    priority: 100
+    provider_model: deepseek-v4-flash
+    base_url: https://api.deepseek.com
+    api_key_env: DEEPSEEK_API_KEY    # 只存 env 变量名，不存密钥
+    structured_output_mode: json_object
+    pricing: {input: 1.0, cached_input: 0.1, output: 4.0}
+  chat-pro:
+    adapter: openai_compatible
+    capabilities: [streaming, structured_output]
+    priority: 80
+    provider_model: deepseek-v4-pro
+    base_url: https://api.deepseek.com
+    api_key_env: DEEPSEEK_API_KEY
+    structured_output_mode: json_schema
+    pricing: {input: 0.8, cached_input: 0.08, output: 3.2}
+
+routing:
+  health: {consecutive_failure_threshold: 3, cooldown_seconds: 30}
+
+limits:
+  max_concurrent_requests: 100
+  per_model_max_concurrent: 20
+  queue_timeout_seconds: 5
+  min_remaining_budget_seconds: 1.0
+
+retry:
+  max_attempts_per_model: 2
+  base_delay_seconds: 0.1
+  backoff_factor: 2.0
+  max_delay_seconds: 2.0
+  jitter: true
+
+prompts:
+  chars_per_token_estimate: 2.0      # Context 预算的 token 估算系数（中文保守值）
+
+storage:
+  backend: sqlite                    # 审计/决策/指标/检查点/激活表共库落盘（memory 不落盘）
+  database_path: data/gateway.db     # SQLite 库文件路径，父目录自动创建
+
+admin_endpoints:
+  enabled: false                     # 管理面端点默认不挂载
+
+logging:
+  level: INFO
+  access: {handler: console, format: json}
+  error: {handler: console, format: json}
+  audit: {handler: console, format: json}

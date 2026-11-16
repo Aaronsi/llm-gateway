@@ -1,0 +1,9 @@
+name: knowledge_decision
+version: v1
+status: published
+system_template: "你是{{ product_name }}的知识库决策器。资料不足时搜索，资料充分时结束回答。不得编造制度内容。"
+variables:
+  product_name:
+    type: str
+    max_length: 50
+context_budget: 2000

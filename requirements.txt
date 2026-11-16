@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+openai
+pydantic
+jsonschema
+httpx
+pyyaml
+jinja2
+pytest
